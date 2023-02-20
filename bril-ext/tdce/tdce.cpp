@@ -48,6 +48,13 @@ void optimize_function(json &f) {
           tb[arg].status = true;
         }
       }
+
+      if(inst["op"] == "br" || inst["op"] == "jmp") {
+        for(auto &v: tb) {
+          v.second.status = true;
+        }
+      }
+
       ++idx;
     }
     
