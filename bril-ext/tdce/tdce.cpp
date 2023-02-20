@@ -1,38 +1,66 @@
 #include <iostream>
-#include <map>
+#include <algorithm>
+#include <unordered_map>
 #include <nlohmann/json.hpp>
 
 using json = nlohmann::json;
+
+struct Node {
+  bool status;
+  int idx;
+};
+
 
 void optimize_function(json &f) {
   // Assuming only one function in a program
   // Ordered map because we want to delete
   bool changed = true;
-  std::map<std::string, bool> tb;
+  std::unordered_map<std::string, Node> tb;
+  std::vector<int> delete_idx;
+  int idx;
 
   while(changed) {
     changed = false;
+    delete_idx.clear();
     tb.clear();
-    for (auto inst : f["instrs"]) {
+    idx = 0;
 
+    for (auto inst : f["instrs"]) {
       if (inst.contains("dest")) {
-        // std::cout<<inst["dest"]<<std::endl;
-        tb.insert({inst["dest"], false});
+        auto key = inst["dest"];
+
+        if(tb.find(key) != tb.end()) {
+          if(!tb[key].status) {
+            // Reassignment without use
+            delete_idx.push_back(tb[key].idx);  
+          } 
+            
+          tb[key].idx = idx;
+          tb[key].status = false;
+        } else {
+          tb.insert({key, {false, idx}});
+        }
       }
 
       if (inst.contains("args")) {
         for (const auto arg : inst["args"]) {
           assert(tb.find(arg) != tb.end());
-          tb[arg] = true;
+          tb[arg].status = true;
         }
       }
+      ++idx;
+    }
+    
+    for(auto [key, n]: tb) {
+      if(!n.status)
+        delete_idx.push_back(n.idx);
     }
 
-    for (auto it = begin(f["instrs"]); it != end(f["instrs"]); ++it) {
-      if (it->contains("dest") && !tb[(*it)["dest"]]) {
-        f["instrs"].erase(it);
-        changed = true;
-      }
+    std::sort(begin(delete_idx), end(delete_idx), std::greater<int>());
+
+    for(auto i : delete_idx) {
+      f["instrs"].erase(i);
+      changed = true;
     }
   }
 }

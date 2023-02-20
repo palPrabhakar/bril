@@ -11,3 +11,7 @@ fi
 
 bril2json < $FILE | ./tdce-bin | bril2txt
 
+# bril2json < $FILE | ./tdce-bin
+
+# bril2json < $FILE | python3 ../../examples/tdce.py tdce+ | bril2txt
+
