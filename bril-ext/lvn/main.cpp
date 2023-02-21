@@ -57,7 +57,8 @@ void lvn(json &block) {
 
     if (node_lookup.find(op) == node_lookup.end()) {
       if (inst.contains("dest")) {
-        lvn_node.var = inst["dest"];
+        // Create unique name for each canonical value
+        lvn_node.var = static_cast<std::string>(inst["dest"]) + std::to_string(lvn_tb.size());
         lvn_tb.push_back(lvn_node);
         variables[inst["dest"]] = lvn_tb.size() - 1;
       } else
@@ -89,11 +90,16 @@ void lvn(json &block) {
       // if op const do nothing
       if (block[i]["op"] != "const") {
         // block[i]["args"][0] = lvn[lvn_tb[i].op1]
+        if(block[i].contains("dest")) {
+          block[i]["dest"] = lvn_tb[i].var;
+        }
         block[i]["args"][0] = lvn_tb[lvn_tb[i].op1].var;
 
         if (block[i]["args"].size() == 2) {
           block[i]["args"][1] = lvn_tb[lvn_tb[i].op2].var;
         }
+      } else {
+        block[i]["dest"] = lvn_tb[i].var;
       }
     }
   }
