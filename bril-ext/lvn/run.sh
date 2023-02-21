@@ -28,13 +28,12 @@
 # bril2json < $FILE | python3 ../../examples/lvn.py | bril2txt
 # bril2json < $FILE | ./lvn | bril2txt
 
-
 # FILE=../../examples/test/lvn/commute.bril
 # bril2json < $FILE | python3 ../../examples/lvn.py | bril2txt
 # bril2json < $FILE | ./lvn | bril2txt
 
-FILE=../../examples/test/lvn/divide-by-zero.bril
-bril2json < $FILE | python3 ../../examples/lvn.py | bril2txt
-bril2json < $FILE | ./lvn | bril2txt
+# FILE=../../examples/test/lvn/divide-by-zero.bril
+# bril2json < $FILE | python3 ../../examples/lvn.py | bril2txt
+# bril2json < $FILE | ./lvn | bril2txt
 
 

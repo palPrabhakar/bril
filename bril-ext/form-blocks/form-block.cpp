@@ -10,6 +10,9 @@ json get_blocks(json &f) {
         blocks.insert(blocks.end(), block);
         block.clear();
       }
+      block.insert(block.end(), inst);
+      blocks.insert(blocks.end(), block);
+      block.clear();
     } else {
       if (inst["op"] == BR || inst["op"] == JMP) {
         block.insert(block.end(), inst);

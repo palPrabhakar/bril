@@ -2,7 +2,8 @@
 
 # echo Running Dead code elimination 
 
-FILE=../../examples/test/tdce/simple.bril
+# FILE=../../examples/test/tdce/simple.bril
+FILE=../../examples/test/tdce/diamond.bril
 
 if [[ "$#" -eq 1 ]]; then
   FILE=$1

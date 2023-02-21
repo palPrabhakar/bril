@@ -9,6 +9,8 @@ __pycache__
 .vscode
 a.out
 tdce-bin
+lvn
+*.dSYM
 
 
 **/*.o

@@ -21,6 +21,9 @@ using json = nlohmann::json;
 // using tb_it = std::map<Node, std::string>::const_iterator;
 
 void lvn(json &block) {
+  if(block[0].contains("label"))
+    return;
+  
   // set to hold all the variables that are assigned
   std::vector<Node> lvn_tb;
   std::unordered_map<std::string, int> node_lookup;
