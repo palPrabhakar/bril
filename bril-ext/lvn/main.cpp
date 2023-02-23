@@ -6,10 +6,20 @@
 #include <string>
 #include <unordered_map>
 
-// struct Node {
-//   std::string op;
-//   int op1, op2;
-// };
+// Current known issues 
+// The pratice of assigning a unique name to each canonical value doesn't work
+// The problem is when there are more than one basic block in the function 
+// In case of reassignment, the value might be used outside the basic block 
+// In such case the reference for the variable is lost 
+
+// The assertion in the else case is wrong 
+// Again for the reason specified above
+// Works only for a function with single basic block 
+
+// Doesn't work with jmp cases 
+// Deosn't work with relationals 
+// Doesnt' work with any types other than int
+
 
 struct Node {
   std::string op;
@@ -24,28 +34,34 @@ void lvn(json &block) {
   if(block[0].contains("label"))
     return;
   
+  int count = 0;
   // set to hold all the variables that are assigned
-  std::vector<Node> lvn_tb;
-  std::unordered_map<std::string, int> node_lookup;
-  std::unordered_map<std::string, int> variables;
+  // For every instruction create a node
+  std::vector<Node> lvn_tb; // inst --> node
+  std::unordered_map<std::string, int> node_lookup; // stores the unique op code for every unique instr
+  std::unordered_map<std::string, int> variables; // for every assigned variable the current 
   // int idx = 0;
 
   std::string op;
 
   for (auto &inst : block) {
     // Add a entry in the lvn_tb for each inst
-    // std::cout<<inst.dump(2)<<std::endl;
+    // std::cerr<<inst.dump(2)<<std::endl;
     Node lvn_node;
     op = inst["op"];
     lvn_node.op = op;
 
     if (op == "const") {
-      // std::cout<<"CONST"<<std::endl;
+      // std::cerr<<"CONST"<<std::endl;
       lvn_node.op1 = inst["value"];
       op += std::to_string(lvn_node.op1);
       op += std::to_string(lvn_node.op2);
+    } else if (op == "jmp") {
+      // op += inst["labels"][0];
+      op += std::to_string(lvn_node.op1);
+      op += std::to_string(lvn_node.op2);
     } else {
-      // std::cout<<"NON CONST"<<std::endl;
+      // std::cerr<<"NON CONST"<<std::endl;
       assert(variables.find(inst["args"][0]) != variables.end());
       lvn_node.op1 = variables[inst["args"][0]];
       op += std::to_string(lvn_node.op1);
@@ -56,14 +72,20 @@ void lvn(json &block) {
       op += std::to_string(lvn_node.op2);
     }
 
-    // std::cout<<"OP CODE: "<<op<<std::endl;
+    // std::cerr<<"OP CODE: "<<op<<std::endl;
 
     if (node_lookup.find(op) == node_lookup.end()) {
       if (inst.contains("dest")) {
-        // Create unique name for each canonical value
-        lvn_node.var = static_cast<std::string>(inst["dest"]) + std::to_string(lvn_tb.size());
+        // check if the variable already exist 
+        auto key = inst["dest"];
+        if(variables.find(key) != variables.end()) {
+          // Already exist    
+          auto idx = variables[key];
+          lvn_tb[idx].var = "lvn." + std::to_string(count++);
+        } 
+        lvn_node.var = key;
         lvn_tb.push_back(lvn_node);
-        variables[inst["dest"]] = lvn_tb.size() - 1;
+        variables[key] = lvn_tb.size() - 1;
       } else
         lvn_tb.push_back(lvn_node);
 
@@ -79,10 +101,13 @@ void lvn(json &block) {
   }
 
   for (int i = 0; i < lvn_tb.size(); ++i) {
+    if(block[i]["op"] == "jmp")
+      continue;
+
     op = lvn_tb[i].op;
     op += std::to_string(lvn_tb[i].op1);
     op += std::to_string(lvn_tb[i].op2);
-    // std::cout << "OP CODE: " << op << std::endl;
+    // std::cerr << "OP CODE: " << op << std::endl;
     if (node_lookup[op] != i) {
       // Node shown up before
       block[i]["op"] = "id";
@@ -115,7 +140,7 @@ void optimize_function(json &f) {
     lvn(block);
   }
 
-  // std::cout << blocks.dump(2) << std::endl;
+  // std::cerr << blocks.dump(2) << std::endl;
   f["instrs"].clear();
   for(auto block: blocks) {
     for(auto inst: block) {
