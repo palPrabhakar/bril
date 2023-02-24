@@ -246,7 +246,7 @@ def _canonicalize(value):
         return value
 
 
-def lvn(bril, prop=False, canon=False, fold=False):
+def lvn(bril, prop=True, canon=True, fold=True):
     """Apply the local value numbering optimization to every basic block
     in every function.
     """

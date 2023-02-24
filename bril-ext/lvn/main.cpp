@@ -6,19 +6,10 @@
 #include <string>
 #include <unordered_map>
 
-// Current known issues
-// The pratice of assigning a unique name to each canonical value doesn't work
-// The problem is when there are more than one basic block in the function
-// In case of reassignment, the value might be used outside the basic block
-// In such case the reference for the variable is lost
-
-// The assertion in the else case is wrong
-// Again for the reason specified above
-// Works only for a function with single basic block
-
-// Doesn't work with jmp cases
-// Deosn't work with relationals
-// Doesnt' work with any types other than int
+// Local Value Numbering Implementation
+// The current implementation has:
+// 1. Trivial common subexpression elimination
+// 2. Trivial Copy Propogation
 
 struct Node {
   bool op1_first;
@@ -63,6 +54,7 @@ void lvn(json &block) {
       } else {
         lvn_node.op1 = inst["value"] ? "true" : "false";
       }
+      lvn_node.op1_first = true;
       op += lvn_node.op1;
       op += lvn_node.op2;
     } else if (op == "jmp") {
@@ -135,7 +127,16 @@ void lvn(json &block) {
       block[i]["args"].push_back(lvn_tb[idx].var);
     } else {
       // if op const do nothing
-      if (block[i]["op"] != "const") {
+      if (block[i]["op"] == "id") {
+          block[i]["dest"] = lvn_tb[i].var;
+          std::string dest;
+          Node cur = lvn_tb[i];
+          while(!cur.op1_first) {
+            // std::cerr<<cur.var<<std::endl;
+            cur = lvn_tb[std::stoi(cur.op1)];
+          }
+          block[i]["args"][0] = cur.var;
+      } else if (block[i]["op"] != "const") {
         // block[i]["args"][0] = lvn[lvn_tb[i].op1]
         if (block[i].contains("dest")) {
           block[i]["dest"] = lvn_tb[i].var;
