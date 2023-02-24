@@ -22,23 +22,9 @@ struct Node {
 
 using json = nlohmann::json;
 // using tb_it = std::map<Node, std::string>::const_iterator;
+//
 
-void lvn(json &block) {
-  // std::cerr<<"Processing block\n";
-
-  if (block[0].contains("label"))
-    return;
-
-  int count = 0;
-  // set to hold all the variables that are assigned
-  // For every instruction create a node
-  std::vector<Node> lvn_tb; // inst --> node
-  std::unordered_map<std::string, int>
-      node_lookup; // stores the unique op code for every unique instr
-  std::unordered_map<std::string, int>
-      variables; // for every assigned variable the current
-  // int idx = 0;
-
+void analyze_block(json &block, std::vector<Node> &lvn_tb, std::unordered_map<std::string, int> &node_lookup, std::unordered_map<std::string, int> &variables, int &count) {
   std::string op;
 
   for (auto &inst : block) {
@@ -110,7 +96,10 @@ void lvn(json &block) {
       }
     }
   }
+}
 
+void modify_block(json &block, std::vector<Node> &lvn_tb, std::unordered_map<std::string, int> &node_lookup, std::unordered_map<std::string, int> &variables) {
+  std::string op;
   for (int i = 0; i < lvn_tb.size(); ++i) {
     if (block[i]["op"] == "jmp")
       continue;
@@ -159,6 +148,27 @@ void lvn(json &block) {
       }
     }
   }
+}
+
+void lvn(json &block) {
+  // std::cerr<<"Processing block\n";
+
+  if (block[0].contains("label"))
+    return;
+
+  int count = 0;
+  // set to hold all the variables that are assigned
+  // For every instruction create a node
+  std::vector<Node> lvn_tb; // inst --> node
+  std::unordered_map<std::string, int>
+      node_lookup; // stores the unique op code for every unique instr
+  std::unordered_map<std::string, int>
+      variables; // for every assigned variable the current
+  
+  analyze_block(block, lvn_tb, node_lookup, variables, count);
+
+  modify_block(block, lvn_tb, node_lookup, variables);
+
 }
 
 void optimize_function(json &f) {
