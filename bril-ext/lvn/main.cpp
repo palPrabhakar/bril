@@ -12,7 +12,6 @@
 // 2. Trivial copy propogation
 // 3. CSE commutivity
 
-
 // Quite a poor algorithm design..LOL
 
 struct Node {
@@ -22,7 +21,7 @@ struct Node {
   bool op2_first;
   std::string op; // operator
   // canonical variable for the operation.
-  std::string var;  
+  std::string var;
   std::string op1; // operand 1
   std::string op2; // operand 2
 };
@@ -35,7 +34,7 @@ void analyze_block(json &block, std::vector<Node> &lvn_tb,
                    std::unordered_map<std::string, int> &node_lookup,
                    std::unordered_map<std::string, int> &variables,
                    int &count) {
-  std::string op; // unique op code for identify operations
+  std::string op;  // unique op code for identify operations
   std::string op2; // for cse commutivity "add", "mul"
 
   for (auto &inst : block) {
@@ -78,14 +77,14 @@ void analyze_block(json &block, std::vector<Node> &lvn_tb,
         }
       }
       op += lvn_node.op2;
-      if(lvn_node.op == "add" || lvn_node.op == "mul") {
+      if (lvn_node.op == "add" || lvn_node.op == "mul") {
         op2 = lvn_node.op + lvn_node.op2 + lvn_node.op1;
-      } 
+      }
     }
 
     // std::cerr << "OP CODE: " << op << std::endl;
     // std::cerr << "OP CODE: " << op2 << std::endl;
-    if(node_lookup.find(op) != node_lookup.end()) {
+    if (node_lookup.find(op) != node_lookup.end()) {
       if (inst.contains("dest")) {
         lvn_node.var = lvn_tb[node_lookup[op]].var;
         lvn_tb.push_back(lvn_node);
@@ -101,8 +100,7 @@ void analyze_block(json &block, std::vector<Node> &lvn_tb,
       } else {
         lvn_tb.push_back(lvn_node);
       }
-    }
-    else {
+    } else {
       if (inst.contains("dest")) {
         // check if the variable already exist
         auto key = inst["dest"];
@@ -110,6 +108,7 @@ void analyze_block(json &block, std::vector<Node> &lvn_tb,
           // Already exist
           auto idx = variables[key];
           lvn_tb[idx].var = "lvn." + std::to_string(count++);
+          variables[lvn_tb[idx].var] = idx;
         }
         lvn_node.var = key;
         lvn_tb.push_back(lvn_node);
@@ -118,8 +117,14 @@ void analyze_block(json &block, std::vector<Node> &lvn_tb,
         lvn_tb.push_back(lvn_node);
       }
       node_lookup.insert({op, lvn_tb.size() - 1});
-    } 
+    }
 
+    // std::cerr<<"Printing LVN_NODE:"<<std::endl;
+    // std::cerr<<"lvn_node.op: "<<lvn_node.op<<std::endl;
+    // std::cerr<<"lvn_node.op1: "<<lvn_node.op1<<std::endl;
+    // std::cerr<<"lvn_node.op2: "<<lvn_node.op2<<std::endl;
+    // std::cerr<<"lvn_node.var: "<<lvn_node.var<<std::endl;
+    // std::cerr<<std::endl;
   }
 }
 
@@ -127,10 +132,10 @@ void analyze_block(json &block, std::vector<Node> &lvn_tb,
 void get_arg1(json &block, std::vector<Node> &lvn_tb, int i) {
   std::string dest;
   Node cur = lvn_tb[i];
-  while(!cur.op1_first) {
+  while (!cur.op1_first) {
     // std::cerr<<cur.var<<std::endl;
     cur = lvn_tb[std::stoi(cur.op1)];
-    if(cur.op != "id")
+    if (cur.op != "id")
       break;
   }
   block[i]["args"][0] = cur.var;
@@ -143,10 +148,31 @@ void get_arg2(json &block, std::vector<Node> &lvn_tb, int i) {
   while (!cur.op2_first) {
     // std::cerr<<cur.var<<std::endl;
     cur = lvn_tb[std::stoi(cur.op2)];
-    if(cur.op != "id")
+    if (cur.op != "id")
       break;
   }
   block[i]["args"][1] = cur.var;
+}
+
+void do_constant_propogation(json &block, std::vector<Node> &lvn_tb,
+                             std::unordered_map<std::string, int> &variables,
+                             int i) {
+  std::string arg1 = static_cast<std::string>(block[i]["args"][0]);
+  int idx_arg1 = variables[arg1];
+
+  // std::cerr<<"arg1: "<<arg1<<", "<<lvn_tb[idx_arg1].op<<std::endl;
+
+  if (lvn_tb[idx_arg1].op == "const") {
+    block[i]["op"] = "const";
+    block[i]["args"].clear();
+
+    if (lvn_tb[idx_arg1].op1 == "true" || lvn_tb[idx_arg1].op1 == "false") {
+      bool value = lvn_tb[idx_arg1].op1 == "true" ? true : false;
+      block[i]["value"] = value;
+    } else {
+      block[i]["value"] = std::stoi(lvn_tb[idx_arg1].op1);
+    }
+  }
 }
 
 void modify_block(json &block, std::vector<Node> &lvn_tb,
@@ -167,28 +193,17 @@ void modify_block(json &block, std::vector<Node> &lvn_tb,
       block[i]["args"].clear();
       int idx = node_lookup[op];
       block[i]["args"].push_back(lvn_tb[idx].var);
+
+      // constant propogation
+      do_constant_propogation(block, lvn_tb, variables, i);
     } else {
       // if op const do nothing
       if (block[i]["op"] == "id") {
         block[i]["dest"] = lvn_tb[i].var;
-        get_arg1(block, lvn_tb, i); 
+        get_arg1(block, lvn_tb, i);
 
-        // constant propogation 
-        std::string arg1 = static_cast<std::string>(block[i]["args"][0]);
-        int idx_arg1 = variables[arg1];
-        if(lvn_tb[idx_arg1].op == "const") {
-          block[i]["op"] = "const";
-          // perhapse requires proper type casting
-          // std::cerr<<lvn_tb[idx_arg1].op1<<std::endl;
-          block[i]["args"].clear();
-          if(lvn_tb[idx_arg1].op1 == "true" || lvn_tb[idx_arg1].op1 == "false") {
-            bool value = lvn_tb[idx_arg1].op1 == "true" ? true : false;
-            block[i]["value"] = value;
-          } else {
-            block[i]["value"] = std::stoi(lvn_tb[idx_arg1].op1);
-          }
-          
-        }
+        // constant propogation
+        do_constant_propogation(block, lvn_tb, variables, i);
 
       } else if (block[i]["op"] != "const") {
         // block[i]["args"][0] = lvn[lvn_tb[i].op1]
