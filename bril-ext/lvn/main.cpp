@@ -9,7 +9,7 @@
 // Local Value Numbering Implementation
 // The current implementation has:
 // 1. Trivial common subexpression elimination
-// 2. Trivial Copy Propogation
+// 2. Trivial copy propogation
 
 struct Node {
   bool op1_first;
@@ -24,7 +24,10 @@ using json = nlohmann::json;
 // using tb_it = std::map<Node, std::string>::const_iterator;
 //
 
-void analyze_block(json &block, std::vector<Node> &lvn_tb, std::unordered_map<std::string, int> &node_lookup, std::unordered_map<std::string, int> &variables, int &count) {
+void analyze_block(json &block, std::vector<Node> &lvn_tb,
+                   std::unordered_map<std::string, int> &node_lookup,
+                   std::unordered_map<std::string, int> &variables,
+                   int &count) {
   std::string op;
 
   for (auto &inst : block) {
@@ -98,7 +101,33 @@ void analyze_block(json &block, std::vector<Node> &lvn_tb, std::unordered_map<st
   }
 }
 
-void modify_block(json &block, std::vector<Node> &lvn_tb, std::unordered_map<std::string, int> &node_lookup, std::unordered_map<std::string, int> &variables) {
+void get_arg1(json &block, std::vector<Node> &lvn_tb, int i) {
+  std::string dest;
+  Node cur = lvn_tb[i];
+  while(!cur.op1_first) {
+    // std::cerr<<cur.var<<std::endl;
+    cur = lvn_tb[std::stoi(cur.op1)];
+    if(cur.op != "id")
+      break;
+  }
+  block[i]["args"][0] = cur.var;
+}
+
+void get_arg2(json &block, std::vector<Node> &lvn_tb, int i) {
+  std::string dest;
+  Node cur = lvn_tb[i];
+  while (!cur.op2_first) {
+    // std::cerr<<cur.var<<std::endl;
+    cur = lvn_tb[std::stoi(cur.op2)];
+    if(cur.op != "id")
+      break;
+  }
+  block[i]["args"][1] = cur.var;
+}
+
+void modify_block(json &block, std::vector<Node> &lvn_tb,
+                  std::unordered_map<std::string, int> &node_lookup,
+                  std::unordered_map<std::string, int> &variables) {
   std::string op;
   for (int i = 0; i < lvn_tb.size(); ++i) {
     if (block[i]["op"] == "jmp")
@@ -117,14 +146,8 @@ void modify_block(json &block, std::vector<Node> &lvn_tb, std::unordered_map<std
     } else {
       // if op const do nothing
       if (block[i]["op"] == "id") {
-          block[i]["dest"] = lvn_tb[i].var;
-          std::string dest;
-          Node cur = lvn_tb[i];
-          while(!cur.op1_first) {
-            // std::cerr<<cur.var<<std::endl;
-            cur = lvn_tb[std::stoi(cur.op1)];
-          }
-          block[i]["args"][0] = cur.var;
+        block[i]["dest"] = lvn_tb[i].var;
+        get_arg1(block, lvn_tb, i); 
       } else if (block[i]["op"] != "const") {
         // block[i]["args"][0] = lvn[lvn_tb[i].op1]
         if (block[i].contains("dest")) {
@@ -134,13 +157,15 @@ void modify_block(json &block, std::vector<Node> &lvn_tb, std::unordered_map<std
         if (lvn_tb[i].op1_first) {
           block[i]["args"][0] = lvn_tb[i].op1;
         } else {
-          block[i]["args"][0] = lvn_tb[std::stoi(lvn_tb[i].op1)].var;
+          get_arg1(block, lvn_tb, i);
+          // block[i]["args"][0] = lvn_tb[std::stoi(lvn_tb[i].op1)].var;
         }
         if (block[i]["args"].size() == 2) {
           if (lvn_tb[i].op2_first) {
             block[i]["args"][1] = lvn_tb[i].op2;
           } else {
-            block[i]["args"][1] = lvn_tb[std::stoi(lvn_tb[i].op2)].var;
+            // block[i]["args"][1] = lvn_tb[std::stoi(lvn_tb[i].op2)].var;
+            get_arg2(block, lvn_tb, i);
           }
         }
       } else {
@@ -164,11 +189,10 @@ void lvn(json &block) {
       node_lookup; // stores the unique op code for every unique instr
   std::unordered_map<std::string, int>
       variables; // for every assigned variable the current
-  
+
   analyze_block(block, lvn_tb, node_lookup, variables, count);
 
   modify_block(block, lvn_tb, node_lookup, variables);
-
 }
 
 void optimize_function(json &f) {
