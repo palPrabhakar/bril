@@ -27,15 +27,17 @@
 
 # echo "\n------------\n"
 
-FILE=../../examples/test/lvn/clobber.bril
-bril2json < $FILE | python3 ../../examples/lvn.py | bril2txt
-bril2json < $FILE | ./lvn | bril2txt
+# FILE=../../examples/test/lvn/clobber.bril
+# bril2json < $FILE | python3 ../../examples/lvn.py | bril2txt
+# bril2json < $FILE | ./lvn | bril2txt
 
 echo "\n------------\n"
 
 FILE=../../examples/test/lvn/clobber-fold.bril
 bril2json < $FILE | python3 ../../examples/lvn.py | bril2txt
 bril2json < $FILE | ./lvn | bril2txt
+
+# echo "\n------------\n"
 
 # FILE=../../examples/test/lvn/commute.bril
 # bril2json < $FILE | python3 ../../examples/lvn.py | bril2txt
@@ -45,38 +47,44 @@ bril2json < $FILE | ./lvn | bril2txt
 # bril2json < $FILE | python3 ../../examples/lvn.py | bril2txt
 # bril2json < $FILE | ./lvn | bril2txt
 
-FILE=../../examples/test/lvn/idchain.bril
+# FILE=../../examples/test/lvn/idchain.bril
+# bril2json < $FILE | python3 ../../examples/lvn.py | bril2txt
+# bril2json < $FILE | ./lvn | bril2txt
+
+echo "\n------------\n"
+
+FILE=../../examples/test/lvn/redundant-dce.bril
 bril2json < $FILE | python3 ../../examples/lvn.py | bril2txt
 bril2json < $FILE | ./lvn | bril2txt
 
-# FILE=../../examples/test/lvn/redundant-dce.bril
-# bril2json < $FILE | python3 ../../examples/lvn.py | bril2txt
-# bril2json < $FILE | ./lvn | bril2txt
+echo "\n------------\n"
 
-# FILE=../../examples/test/lvn/rename-fold.bril
-# bril2json < $FILE | python3 ../../examples/lvn.py | bril2txt
-# bril2json < $FILE | ./lvn | bril2txt
+FILE=../../examples/test/lvn/rename-fold.bril
+bril2json < $FILE | python3 ../../examples/lvn.py | bril2txt
+bril2json < $FILE | ./lvn | bril2txt
 
-# NOTE --> This case fails
-# FILE=../../examples/test/lvn/nonlocal.bril
-# bril2json < $FILE | python3 ../../examples/lvn.py | bril2txt
-# bril2json < $FILE | ./lvn | bril2txt
+echo "\n------------\n"
 
-# NOTE --> This case fails
-# FILE=../../examples/test/lvn/logical-operators.bril
-# bril2json < $FILE | python3 ../../examples/lvn.py | bril2txt
-# bril2json < $FILE | ./lvn | bril2txt
+FILE=../../examples/test/lvn/nonlocal.bril
+bril2json < $FILE | python3 ../../examples/lvn.py | bril2txt
+bril2json < $FILE | ./lvn | bril2txt
 
-# NOTE --> This case fails
-# The algo doesn't work on anything other than int types lol
-# FILE=../../examples/test/lvn/fold-comparisons.bril
-# bril2json < $FILE | python3 ../../examples/lvn.py | bril2txt
-# bril2json < $FILE | ./lvn | bril2txt
+echo "\n------------\n"
 
-# NOTE --> This case fails
-# Fails with jmp cases
-# FILE=../../examples/test/lvn/idchain-nonlocal.bril
-# bril2json < $FILE | python3 ../../examples/lvn.py | bril2txt
-# bril2json < $FILE | ./lvn | bril2txt
+FILE=../../examples/test/lvn/logical-operators.bril
+bril2json < $FILE | python3 ../../examples/lvn.py | bril2txt
+bril2json < $FILE | ./lvn | bril2txt
+
+echo "\n------------\n"
+
+FILE=../../examples/test/lvn/fold-comparisons.bril
+bril2json < $FILE | python3 ../../examples/lvn.py | bril2txt
+bril2json < $FILE | ./lvn | bril2txt
+
+echo "\n------------\n"
+
+FILE=../../examples/test/lvn/idchain-nonlocal.bril
+bril2json < $FILE | python3 ../../examples/lvn.py | bril2txt
+bril2json < $FILE | ./lvn | bril2txt
 
 

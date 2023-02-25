@@ -30,6 +30,14 @@ using json = nlohmann::json;
 // using tb_it = std::map<Node, std::string>::const_iterator;
 //
 
+void print_lvn_node(Node lvn_node) {
+  std::cerr << "Printing LVN_NODE:" << std::endl;
+  std::cerr << "lvn_node.op: " << lvn_node.op << std::endl;
+  std::cerr << "lvn_node.op1: " << lvn_node.op1 << std::endl;
+  std::cerr << "lvn_node.op2: " << lvn_node.op2 << std::endl;
+  std::cerr << "lvn_node.var: " << lvn_node.var << std::endl;
+  std::cerr << std::endl;
+}
 void analyze_block(json &block, std::vector<Node> &lvn_tb,
                    std::unordered_map<std::string, int> &node_lookup,
                    std::unordered_map<std::string, int> &variables,
@@ -118,13 +126,6 @@ void analyze_block(json &block, std::vector<Node> &lvn_tb,
       }
       node_lookup.insert({op, lvn_tb.size() - 1});
     }
-
-    // std::cerr<<"Printing LVN_NODE:"<<std::endl;
-    // std::cerr<<"lvn_node.op: "<<lvn_node.op<<std::endl;
-    // std::cerr<<"lvn_node.op1: "<<lvn_node.op1<<std::endl;
-    // std::cerr<<"lvn_node.op2: "<<lvn_node.op2<<std::endl;
-    // std::cerr<<"lvn_node.var: "<<lvn_node.var<<std::endl;
-    // std::cerr<<std::endl;
   }
 }
 
@@ -132,6 +133,12 @@ void analyze_block(json &block, std::vector<Node> &lvn_tb,
 void get_arg1(json &block, std::vector<Node> &lvn_tb, int i) {
   std::string dest;
   Node cur = lvn_tb[i];
+  
+  if(cur.op1_first) {
+    block[i]["args"][0] = cur.op1;
+    return;
+  }
+
   while (!cur.op1_first) {
     // std::cerr<<cur.var<<std::endl;
     cur = lvn_tb[std::stoi(cur.op1)];
@@ -145,6 +152,12 @@ void get_arg1(json &block, std::vector<Node> &lvn_tb, int i) {
 void get_arg2(json &block, std::vector<Node> &lvn_tb, int i) {
   std::string dest;
   Node cur = lvn_tb[i];
+
+  if(cur.op2_first) {
+    block[i]["args"][1] = cur.op2;
+    return;
+  }
+
   while (!cur.op2_first) {
     // std::cerr<<cur.var<<std::endl;
     cur = lvn_tb[std::stoi(cur.op2)];
@@ -158,6 +171,9 @@ void do_constant_propogation(json &block, std::vector<Node> &lvn_tb,
                              std::unordered_map<std::string, int> &variables,
                              int i) {
   std::string arg1 = static_cast<std::string>(block[i]["args"][0]);
+  if (variables.find(arg1) == variables.end()) {
+    return;
+  }
   int idx_arg1 = variables[arg1];
 
   // std::cerr<<"arg1: "<<arg1<<", "<<lvn_tb[idx_arg1].op<<std::endl;
@@ -201,6 +217,8 @@ void modify_block(json &block, std::vector<Node> &lvn_tb,
       if (block[i]["op"] == "id") {
         block[i]["dest"] = lvn_tb[i].var;
         get_arg1(block, lvn_tb, i);
+        
+        // print_lvn_node(lvn_tb[i]);
 
         // constant propogation
         do_constant_propogation(block, lvn_tb, variables, i);
