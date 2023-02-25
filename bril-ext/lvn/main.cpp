@@ -191,7 +191,7 @@ void do_constant_propogation(json &block, _lvn_tb &lvn_tb,
 }
 
 bool is_foldable_operation(std::string op) {
-  if (op == "add" || op == "mul") {
+  if (op == "add" || op == "mul" || op == "and" || op == "or" || op == "not") {
     return true;
   }
 
@@ -224,6 +224,10 @@ void do_constant_folding(json &block, _lvn_tb &lvn_tb, _variable_map &variables,
     return;
   }
 
+  // Do constant folding for not
+  if(op == "not")
+    return;
+
   std::string arg1 = block[i]["args"][0];
   std::string arg2 = block[i]["args"][1];
   int val1, val2;
@@ -232,14 +236,41 @@ void do_constant_folding(json &block, _lvn_tb &lvn_tb, _variable_map &variables,
     // Do folding
     block[i]["args"].clear();
     if(op == "add") {
-      block[i]["value"] = val1+val2;
+      int add = val1+val2;
+      block[i]["value"] = add;
+      lvn_tb[i].op1 = std::to_string(add);
     }
     else if (op == "mul") {
-      block[i]["value"] = val1*val2;
+      int prod = val1*val2;
+      block[i]["value"] = std::to_string(prod);
+      lvn_tb[i].op1 = prod; 
+    } else if (op == "and") {
+      if(val1 == 0) {
+        block[i]["value"] = false;
+        lvn_tb[i].op1 = "false";
+      }
+      else if (val2 == 1) {
+        block[i]["value"] = true;
+        lvn_tb[i].op1 = "true";
+      } else {
+        block[i]["value"] = false;
+        lvn_tb[i].op1 = "false";
+      }
+    } else if (op == "or") {
+      if(val1 == 1) {
+        block[i]["value"] = true;
+        lvn_tb[i].op1 = "true";
+      }
+      else if (val2 == 0) {
+        block[i]["value"] = false;
+        lvn_tb[i].op1 = "false";
+      } else {
+        block[i]["value"] = true;
+        lvn_tb[i].op1 = "true";
+      }
     }
     block[i]["op"] = "const";
     lvn_tb[i].op = "const";
-    lvn_tb[i].op1 = std::to_string(static_cast<int>(block[i]["value"]));
     lvn_tb[i].op1_first = true;
   }
 }
