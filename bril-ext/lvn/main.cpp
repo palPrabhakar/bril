@@ -29,12 +29,14 @@ void analyze_block(json &block, std::vector<Node> &lvn_tb,
                    std::unordered_map<std::string, int> &variables,
                    int &count) {
   std::string op;
+  std::string op2;
 
   for (auto &inst : block) {
     // Add a entry in the lvn_tb for each inst
     // std::cerr<<inst.dump(2)<<std::endl;
     Node lvn_node;
     op = inst["op"];
+    op2 = "";
     lvn_node.op = op;
 
     if (op == "const") {
@@ -69,11 +71,31 @@ void analyze_block(json &block, std::vector<Node> &lvn_tb,
         }
       }
       op += lvn_node.op2;
+      if(lvn_node.op == "add" || lvn_node.op == "mul") {
+        op2 = lvn_node.op + lvn_node.op2 + lvn_node.op1;
+      } 
     }
 
     // std::cerr << "OP CODE: " << op << std::endl;
-
-    if (node_lookup.find(op) == node_lookup.end()) {
+    // std::cerr << "OP CODE: " << op2 << std::endl;
+    if(node_lookup.find(op) != node_lookup.end()) {
+      if (inst.contains("dest")) {
+        lvn_node.var = lvn_tb[node_lookup[op]].var;
+        lvn_tb.push_back(lvn_node);
+        variables[inst["dest"]] = node_lookup[op];
+      } else {
+        lvn_tb.push_back(lvn_node);
+      }
+    } else if (op2 != "" && node_lookup.find(op2) != node_lookup.end()) {
+      if (inst.contains("dest")) {
+        lvn_node.var = lvn_tb[node_lookup[op2]].var;
+        lvn_tb.push_back(lvn_node);
+        variables[inst["dest"]] = node_lookup[op2];
+      } else {
+        lvn_tb.push_back(lvn_node);
+      }
+    }
+    else {
       if (inst.contains("dest")) {
         // check if the variable already exist
         auto key = inst["dest"];
@@ -89,15 +111,8 @@ void analyze_block(json &block, std::vector<Node> &lvn_tb,
         lvn_tb.push_back(lvn_node);
       }
       node_lookup.insert({op, lvn_tb.size() - 1});
-    } else {
-      if (inst.contains("dest")) {
-        lvn_node.var = lvn_tb[node_lookup[op]].var;
-        lvn_tb.push_back(lvn_node);
-        variables[inst["dest"]] = node_lookup[op];
-      } else {
-        lvn_tb.push_back(lvn_node);
-      }
-    }
+    } 
+
   }
 }
 
