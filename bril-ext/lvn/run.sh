@@ -31,12 +31,6 @@
 # bril2json < $FILE | python3 ../../examples/lvn.py | bril2txt
 # bril2json < $FILE | ./lvn | bril2txt
 
-echo "\n------------\n"
-
-FILE=../../examples/test/lvn/clobber-fold.bril
-bril2json < $FILE | python3 ../../examples/lvn.py | bril2txt
-bril2json < $FILE | ./lvn | bril2txt
-
 # echo "\n------------\n"
 
 # FILE=../../examples/test/lvn/commute.bril
@@ -50,6 +44,8 @@ bril2json < $FILE | ./lvn | bril2txt
 # FILE=../../examples/test/lvn/idchain.bril
 # bril2json < $FILE | python3 ../../examples/lvn.py | bril2txt
 # bril2json < $FILE | ./lvn | bril2txt
+
+# Constant Folding Section
 
 echo "\n------------\n"
 
@@ -87,4 +83,8 @@ FILE=../../examples/test/lvn/idchain-nonlocal.bril
 bril2json < $FILE | python3 ../../examples/lvn.py | bril2txt
 bril2json < $FILE | ./lvn | bril2txt
 
+echo "\n------------\n"
 
+FILE=../../examples/test/lvn/clobber-fold.bril
+bril2json < $FILE | python3 ../../examples/lvn.py | bril2txt
+bril2json < $FILE | ./lvn | bril2txt

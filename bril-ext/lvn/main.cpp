@@ -27,7 +27,9 @@ struct Node {
 };
 
 using json = nlohmann::json;
-// using tb_it = std::map<Node, std::string>::const_iterator;
+using _lvn_tb = std::vector<Node>;
+using _node_map = std::unordered_map<std::string, int>;
+using _variable_map = std::unordered_map<std::string, int>;
 //
 
 void print_lvn_node(Node lvn_node) {
@@ -38,10 +40,8 @@ void print_lvn_node(Node lvn_node) {
   std::cerr << "lvn_node.var: " << lvn_node.var << std::endl;
   std::cerr << std::endl;
 }
-void analyze_block(json &block, std::vector<Node> &lvn_tb,
-                   std::unordered_map<std::string, int> &node_lookup,
-                   std::unordered_map<std::string, int> &variables,
-                   int &count) {
+void analyze_block(json &block, _lvn_tb &lvn_tb, _node_map &node_lookup,
+                   _variable_map &variables, int &count) {
   std::string op;  // unique op code for identify operations
   std::string op2; // for cse commutivity "add", "mul"
 
@@ -130,11 +130,11 @@ void analyze_block(json &block, std::vector<Node> &lvn_tb,
 }
 
 // For trivial copy propogation
-void get_arg1(json &block, std::vector<Node> &lvn_tb, int i) {
+void get_arg1(json &block, _lvn_tb &lvn_tb, int i) {
   std::string dest;
   Node cur = lvn_tb[i];
-  
-  if(cur.op1_first) {
+
+  if (cur.op1_first) {
     block[i]["args"][0] = cur.op1;
     return;
   }
@@ -149,11 +149,11 @@ void get_arg1(json &block, std::vector<Node> &lvn_tb, int i) {
 }
 
 // For trivial copy propogation
-void get_arg2(json &block, std::vector<Node> &lvn_tb, int i) {
+void get_arg2(json &block, _lvn_tb &lvn_tb, int i) {
   std::string dest;
   Node cur = lvn_tb[i];
 
-  if(cur.op2_first) {
+  if (cur.op2_first) {
     block[i]["args"][1] = cur.op2;
     return;
   }
@@ -167,9 +167,8 @@ void get_arg2(json &block, std::vector<Node> &lvn_tb, int i) {
   block[i]["args"][1] = cur.var;
 }
 
-void do_constant_propogation(json &block, std::vector<Node> &lvn_tb,
-                             std::unordered_map<std::string, int> &variables,
-                             int i) {
+void do_constant_propogation(json &block, _lvn_tb &lvn_tb,
+                             _variable_map &variables, int i) {
   std::string arg1 = static_cast<std::string>(block[i]["args"][0]);
   if (variables.find(arg1) == variables.end()) {
     return;
@@ -191,9 +190,62 @@ void do_constant_propogation(json &block, std::vector<Node> &lvn_tb,
   }
 }
 
-void modify_block(json &block, std::vector<Node> &lvn_tb,
-                  std::unordered_map<std::string, int> &node_lookup,
-                  std::unordered_map<std::string, int> &variables) {
+bool is_foldable_operation(std::string op) {
+  if (op == "add" || op == "mul") {
+    return true;
+  }
+
+  return false;
+}
+
+bool is_argument_constant(std::string arg, _lvn_tb &lvn_tb,
+                          _variable_map &variables, int &ret_val) {
+  if (variables.find(arg) != variables.end()) {
+    int idx = variables[arg];
+    if (lvn_tb[idx].op == "const") {
+      if (lvn_tb[idx].op1 == "true") {
+        ret_val = 1;
+      } else if (lvn_tb[idx].op1 == "false") {
+        ret_val = 0;
+      } else {
+        ret_val = std::stoi(lvn_tb[idx].op1);
+      }
+      return true;
+    }
+  }
+  return false;
+}
+
+void do_constant_folding(json &block, _lvn_tb &lvn_tb, _variable_map &variables,
+                         int i) {
+
+  std::string op = block[i]["op"];
+  if (!is_foldable_operation(op)) {
+    return;
+  }
+
+  std::string arg1 = block[i]["args"][0];
+  std::string arg2 = block[i]["args"][1];
+  int val1, val2;
+  if (is_argument_constant(arg1, lvn_tb, variables, val1) &&
+      is_argument_constant(arg2, lvn_tb, variables, val2)) {
+    // Do folding
+    block[i]["args"].clear();
+    if(op == "add") {
+      block[i]["value"] = val1+val2;
+    }
+    else if (op == "mul") {
+      block[i]["value"] = val1*val2;
+    }
+    block[i]["op"] = "const";
+    lvn_tb[i].op = "const";
+    lvn_tb[i].op1 = std::to_string(static_cast<int>(block[i]["value"]));
+    lvn_tb[i].op1_first = true;
+  }
+}
+
+void modify_block(json &block, _lvn_tb &lvn_tb, _node_map &node_lookup,
+                  _variable_map &variables) {
   std::string op;
   for (int i = 0; i < lvn_tb.size(); ++i) {
     if (block[i]["op"] == "jmp")
@@ -217,7 +269,7 @@ void modify_block(json &block, std::vector<Node> &lvn_tb,
       if (block[i]["op"] == "id") {
         block[i]["dest"] = lvn_tb[i].var;
         get_arg1(block, lvn_tb, i);
-        
+
         // print_lvn_node(lvn_tb[i]);
 
         // constant propogation
@@ -243,6 +295,9 @@ void modify_block(json &block, std::vector<Node> &lvn_tb,
             get_arg2(block, lvn_tb, i);
           }
         }
+
+        do_constant_folding(block, lvn_tb, variables, i);
+        // std::cerr << "INST: \n" << block[i].dump(2) << std::endl;
       } else {
         block[i]["dest"] = lvn_tb[i].var;
       }
