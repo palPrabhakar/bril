@@ -65,11 +65,11 @@
 # bril2json < $FILE | python3 ../../examples/lvn.py | bril2txt
 # bril2json < $FILE | ./lvn | bril2txt
 
-echo "\n------------\n"
+# echo "\n------------\n"
 
-FILE=../../examples/test/lvn/logical-operators.bril
-bril2json < $FILE | python3 ../../examples/lvn.py | bril2txt
-bril2json < $FILE | ./lvn | bril2txt
+# FILE=../../examples/test/lvn/logical-operators.bril
+# bril2json < $FILE | python3 ../../examples/lvn.py | bril2txt
+# bril2json < $FILE | ./lvn | bril2txt
 
 echo "\n------------\n"
 

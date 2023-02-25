@@ -11,6 +11,7 @@
 // 1. Trivial common subexpression elimination
 // 2. Trivial copy propogation
 // 3. CSE commutivity
+// 4. Trivial constant folding
 
 // Quite a poor algorithm design..LOL
 
@@ -191,7 +192,7 @@ void do_constant_propogation(json &block, _lvn_tb &lvn_tb,
 }
 
 bool is_foldable_operation(std::string op) {
-  if (op == "add" || op == "mul" || op == "and" || op == "or" || op == "not") {
+  if (op == "add" || op == "mul" || op == "and" || op == "or" || op == "not" || op == "eq" || op == "le" || op == "lt" || op == "gt" || op == "ge") {
     return true;
   }
 
@@ -267,6 +268,46 @@ void do_constant_folding(json &block, _lvn_tb &lvn_tb, _variable_map &variables,
       } else {
         block[i]["value"] = true;
         lvn_tb[i].op1 = "true";
+      }
+    } else if (op == "eq") {
+      if (val1 == val2) {
+        block[i]["value"] = true;
+        lvn_tb[i].op1 = "true";
+      } else {
+        block[i]["value"] = false;
+        lvn_tb[i].op1 = "false";
+      }
+    } else if (op == "le") {
+      if (val1 <= val2) {
+        block[i]["value"] = true;
+        lvn_tb[i].op1 = "true";
+      } else {
+        block[i]["value"] = false;
+        lvn_tb[i].op1 = "false";
+      }
+    } else if (op == "lt") {
+      if (val1 < val2) {
+        block[i]["value"] = true;
+        lvn_tb[i].op1 = "true";
+      } else {
+        block[i]["value"] = false;
+        lvn_tb[i].op1 = "false";
+      }
+    } else if (op == "gt") {
+      if (val1 > val2) {
+        block[i]["value"] = true;
+        lvn_tb[i].op1 = "true";
+      } else {
+        block[i]["value"] = false;
+        lvn_tb[i].op1 = "false";
+      }
+    } else if (op == "ge" ) {
+      if (val1 >= val2) {
+        block[i]["value"] = true;
+        lvn_tb[i].op1 = "true";
+      } else {
+        block[i]["value"] = false;
+        lvn_tb[i].op1 = "false";
       }
     }
     block[i]["op"] = "const";
