@@ -10,14 +10,21 @@
 // The current implementation has:
 // 1. Trivial common subexpression elimination
 // 2. Trivial copy propogation
+// 3. CSE commutivity
+
+
+// Quite a poor algorithm design..LOL
 
 struct Node {
+  // If the operand1 if defined for the first time in the block
   bool op1_first;
+  // If the operand2 if defined for the first time in the block
   bool op2_first;
-  std::string op;
-  std::string var;
-  std::string op1;
-  std::string op2;
+  std::string op; // operator
+  // canonical variable for the operation.
+  std::string var;  
+  std::string op1; // operand 1
+  std::string op2; // operand 2
 };
 
 using json = nlohmann::json;
@@ -28,8 +35,8 @@ void analyze_block(json &block, std::vector<Node> &lvn_tb,
                    std::unordered_map<std::string, int> &node_lookup,
                    std::unordered_map<std::string, int> &variables,
                    int &count) {
-  std::string op;
-  std::string op2;
+  std::string op; // unique op code for identify operations
+  std::string op2; // for cse commutivity "add", "mul"
 
   for (auto &inst : block) {
     // Add a entry in the lvn_tb for each inst
@@ -116,6 +123,7 @@ void analyze_block(json &block, std::vector<Node> &lvn_tb,
   }
 }
 
+// For trivial copy propogation
 void get_arg1(json &block, std::vector<Node> &lvn_tb, int i) {
   std::string dest;
   Node cur = lvn_tb[i];
@@ -128,6 +136,7 @@ void get_arg1(json &block, std::vector<Node> &lvn_tb, int i) {
   block[i]["args"][0] = cur.var;
 }
 
+// For trivial copy propogation
 void get_arg2(json &block, std::vector<Node> &lvn_tb, int i) {
   std::string dest;
   Node cur = lvn_tb[i];
@@ -163,6 +172,24 @@ void modify_block(json &block, std::vector<Node> &lvn_tb,
       if (block[i]["op"] == "id") {
         block[i]["dest"] = lvn_tb[i].var;
         get_arg1(block, lvn_tb, i); 
+
+        // constant propogation 
+        std::string arg1 = static_cast<std::string>(block[i]["args"][0]);
+        int idx_arg1 = variables[arg1];
+        if(lvn_tb[idx_arg1].op == "const") {
+          block[i]["op"] = "const";
+          // perhapse requires proper type casting
+          // std::cerr<<lvn_tb[idx_arg1].op1<<std::endl;
+          block[i]["args"].clear();
+          if(lvn_tb[idx_arg1].op1 == "true" || lvn_tb[idx_arg1].op1 == "false") {
+            bool value = lvn_tb[idx_arg1].op1 == "true" ? true : false;
+            block[i]["value"] = value;
+          } else {
+            block[i]["value"] = std::stoi(lvn_tb[idx_arg1].op1);
+          }
+          
+        }
+
       } else if (block[i]["op"] != "const") {
         // block[i]["args"][0] = lvn[lvn_tb[i].op1]
         if (block[i].contains("dest")) {
