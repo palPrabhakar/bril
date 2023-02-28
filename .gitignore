@@ -8,8 +8,10 @@ hypothesis_*
 __pycache__
 .vscode
 a.out
-tdce-bin
+tdce
 lvn
+df
+form-block
 *.dSYM
 
 

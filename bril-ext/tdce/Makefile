@@ -1,7 +1,7 @@
 all:
-	clang++ -std=c++17 main.cpp -o tdce-bin
+	clang++ -std=c++17 main.cpp -o tdce
 
 clean:
-	rm tdce-bin
+	rm tdce
 
 
