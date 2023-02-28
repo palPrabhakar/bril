@@ -6,6 +6,7 @@ using json = nlohmann::json;
 
 const std::string JMP = "jmp";
 const std::string BR = "br";
+const std::string RET = "ret";
 
 json get_blocks(json &f);
 

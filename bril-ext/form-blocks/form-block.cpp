@@ -1,20 +1,30 @@
 #include "form-block.h"
 #include <cstdio>
 #include <string>
+#include <iostream>
 
 json get_named_blocks(json &f) {
   json::array_t blocks =  get_blocks(f);
-  json ret_blocks;
+  json::array_t ret_blocks;
+
+  // std::cerr<<static_cast<json>(blocks).dump(2)<<std::endl;
 
   int bi = 0;
   std::string name = "";
   for(int i = 0; i < blocks.size(); ++i) {
     if(blocks[i].size() == 1 && blocks[i][0].contains("label")) {
       name = blocks[i][0]["label"];
-      ret_blocks[name] = blocks[++i];
+      // std::cerr<<"block name: "<<name<<"\n";
+      json nblock; 
+      nblock["name"] = name;
+      nblock["insts"] = blocks[++i];
+      ret_blocks.push_back(nblock);
     } else {
       name = "block" + std::to_string(bi++);
-      ret_blocks[name] = blocks[i];
+      json nblock; 
+      nblock["name"] = name;
+      nblock["insts"] = blocks[i];
+      ret_blocks.push_back(nblock);
     }
   }
     

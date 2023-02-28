@@ -1,5 +1,5 @@
 all:
-	clang++ -std=c++17 main.cpp ../form-blocks/form-block.cpp -o cfg
+	clang++ -std=c++17 main.cpp ../form-blocks/form-block.cpp cfg.cpp -o cfg
 
 clean:
 	rm cfg
