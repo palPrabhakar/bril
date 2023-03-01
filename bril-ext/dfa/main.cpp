@@ -11,8 +11,15 @@ void do_dfa() {
 
   for(auto &f: program["functions"]) {
     auto blocks = get_named_blocks(f); 
-    std::cerr<<blocks.dump(2);
+    // std::cerr<<blocks.dump(2);
     auto cfg_map = create_cfg(blocks);
+
+    print_cfg(cfg_map, f["name"]);
+
+    auto pred_map = get_predecessor_map(cfg_map);
+ 
+    print_cfg(pred_map, f["name"]);
+
   }
 
   // std::cerr<<program.dump(2);

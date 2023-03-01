@@ -3,6 +3,18 @@
 #include <iostream>
 #include <unordered_map>
 
+cfg_map get_predecessor_map(cfg_map map) {
+  cfg_map pred;
+  
+  for(auto [key, value]: map) {
+    for(auto val: value) {
+      pred[val].push_back(key);
+    }
+  }
+
+  return pred;
+}
+
 cfg_map create_cfg(json &blocks) {
   cfg_map map;
 
