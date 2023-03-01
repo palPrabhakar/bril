@@ -8,4 +8,6 @@ using cfg_map = std::unordered_map<std::string, std::vector<std::string>>;
 
 cfg_map create_cfg(json &blocks);
 
+void print_cfg(cfg_map map, std::string fn_name);
+
 #endif

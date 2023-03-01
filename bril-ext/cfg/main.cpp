@@ -16,14 +16,8 @@ void form_cfgs() {
     auto blocks = get_named_blocks(f);
 
     auto cfg = create_cfg(blocks);
-
-    for(auto [key, value] : cfg) {
-      std::cerr<<key<<": ";
-      for(auto val: value) {
-        std::cerr<<val<<", ";
-      }
-      std::cerr<<"\n";
-    }
+  
+    print_cfg(cfg, f["name"]);
 
     std::cerr<<"\n";
   }
