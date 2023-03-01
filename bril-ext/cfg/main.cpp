@@ -12,7 +12,10 @@ void form_cfgs() {
     // auto blocks = get_named_blocks(f);
     // std::cout<<blocks.dump(2)<<std::endl;
     std::cerr<<"Function: "<<f["name"]<<"\n";
-    auto cfg = create_cfg(f);
+  
+    auto blocks = get_named_blocks(f);
+
+    auto cfg = create_cfg(blocks);
 
     for(auto [key, value] : cfg) {
       std::cerr<<key<<": ";

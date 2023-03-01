@@ -3,15 +3,14 @@
 #include <iostream>
 #include <unordered_map>
 
-cfg_map create_cfg(json &f) {
+cfg_map create_cfg(json &blocks) {
   cfg_map map;
 
-  auto blocks = get_named_blocks(f);
+  // auto blocks = get_named_blocks(f);
 
   // std::cerr<<"Blocks\n";
   // std::cerr<<blocks.dump(2);
-  // std::cerr<<"\n";
-  // std::cerr<<"\n";
+  // std::cerr<<"\n\n";
 
   std::string prev_block = "";
 
