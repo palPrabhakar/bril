@@ -2,7 +2,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <map>
-#include <nlohmann/json.hpp>
+#include "../json.hpp"
 #include <string>
 #include <unordered_map>
 

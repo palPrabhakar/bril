@@ -15,27 +15,31 @@
 # bril2json < $FILE | python3 ../../examples/lvn.py 
 # bril2json < $FILE | python3 ../../examples/lvn.py | bril2txt
 
-# FILE=../../examples/test/lvn/redundant.bril
+FILE=../../examples/test/lvn/redundant.bril
+cat $FILE
+bril2json < $FILE | python3 ../../examples/lvn.py | bril2txt
+bril2json < $FILE | ./lvn | bril2txt
+
+echo "\n------------\n"
+
+FILE=../../examples/test/lvn/reassign.bril
+cat $FILE
+bril2json < $FILE | python3 ../../examples/lvn.py | bril2txt
+bril2json < $FILE | ./lvn | bril2txt
+
+echo "\n------------\n"
+
+ # FILE=../../examples/test/lvn/clobber.bril
+# cat $FILE
 # bril2json < $FILE | python3 ../../examples/lvn.py | bril2txt
-# bril2json < $FILE | ./lvn | bril2txt
+# bril2json < $FILE | ./lvn 
 
-# echo "\n------------\n"
+echo "\n------------\n"
 
-# FILE=../../examples/test/lvn/reassign.bril
-# bril2json < $FILE | python3 ../../examples/lvn.py | bril2txt
-# bril2json < $FILE | ./lvn | bril2txt
-
-# echo "\n------------\n"
-
-# FILE=../../examples/test/lvn/clobber.bril
-# bril2json < $FILE | python3 ../../examples/lvn.py | bril2txt
-# bril2json < $FILE | ./lvn | bril2txt
-
-# echo "\n------------\n"
-
-# FILE=../../examples/test/lvn/commute.bril
-# bril2json < $FILE | python3 ../../examples/lvn.py | bril2txt
-# bril2json < $FILE | ./lvn | bril2txt
+FILE=../../examples/test/lvn/commute.bril
+cat $FILE
+bril2json < $FILE | python3 ../../examples/lvn.py | bril2txt
+bril2json < $FILE | ./lvn | bril2txt
 
 # FILE=../../examples/test/lvn/divide-by-zero.bril
 # bril2json < $FILE | python3 ../../examples/lvn.py | bril2txt
@@ -49,21 +53,24 @@
 
 # echo "\n------------\n"
 
-# FILE=../../examples/test/lvn/redundant-dce.bril
-# bril2json < $FILE | python3 ../../examples/lvn.py | bril2txt
-# bril2json < $FILE | ./lvn | bril2txt
+FILE=../../examples/test/lvn/redundant-dce.bril
+cat $FILE
+bril2json < $FILE | python3 ../../examples/lvn.py | bril2txt
+bril2json < $FILE | ./lvn | bril2txt
 
-# echo "\n------------\n"
+echo "\n------------\n"
 
-# FILE=../../examples/test/lvn/rename-fold.bril
-# bril2json < $FILE | python3 ../../examples/lvn.py | bril2txt
-# bril2json < $FILE | ./lvn | bril2txt
+FILE=../../examples/test/lvn/rename-fold.bril
+cat $FILE
+bril2json < $FILE | python3 ../../examples/lvn.py | bril2txt
+bril2json < $FILE | ./lvn | bril2txt
 
-# echo "\n------------\n"
+echo "\n------------\n"
 
-# FILE=../../examples/test/lvn/nonlocal.bril
-# bril2json < $FILE | python3 ../../examples/lvn.py | bril2txt
-# bril2json < $FILE | ./lvn | bril2txt
+FILE=../../examples/test/lvn/nonlocal.bril
+cat $FILE
+bril2json < $FILE | python3 ../../examples/lvn.py | bril2txt
+bril2json < $FILE | ./lvn | bril2txt
 
 # echo "\n------------\n"
 
@@ -71,11 +78,11 @@
 # bril2json < $FILE | python3 ../../examples/lvn.py | bril2txt
 # bril2json < $FILE | ./lvn | bril2txt
 
-echo "\n------------\n"
+# echo "\n------------\n"
 
-FILE=../../examples/test/lvn/fold-comparisons.bril
-bril2json < $FILE | python3 ../../examples/lvn.py | bril2txt
-bril2json < $FILE | ./lvn | bril2txt
+# FILE=../../examples/test/lvn/fold-comparisons.bril
+# bril2json < $FILE | python3 ../../examples/lvn.py | bril2txt
+# bril2json < $FILE | ./lvn | bril2txt
 
 # echo "\n------------\n"
 
