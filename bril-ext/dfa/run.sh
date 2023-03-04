@@ -14,7 +14,10 @@ fi
 
 # bril2json < $FILE | ./dfa | bril2txt
 
-bril2json < $FILE | ./dfa
+./dfa
 
-# bril2json < $FILE | python3 ../../examples/df.py 'defined'
+# cat $FILE
+# bril2json < $FILE
+
+bril2json < $FILE | python3 ../../examples/df.py 'defined'
 
