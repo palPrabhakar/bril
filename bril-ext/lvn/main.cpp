@@ -1,8 +1,9 @@
 #include "../form-blocks/form-block.h"
+#include "../json.hpp"
 #include <cstdlib>
 #include <iostream>
+#include <fstream>
 #include <map>
-#include "../json.hpp"
 #include <string>
 #include <unordered_map>
 
@@ -177,6 +178,7 @@ void do_constant_propogation(json &block, _lvn_tb &lvn_tb,
   int idx_arg1 = variables[arg1];
 
   // std::cerr<<"arg1: "<<arg1<<", "<<lvn_tb[idx_arg1].op<<std::endl;
+  // std::cerr<<"\n"<<block[i].dump(2)<<"\n\n";
 
   if (lvn_tb[idx_arg1].op == "const") {
     block[i]["op"] = "const";
@@ -186,6 +188,7 @@ void do_constant_propogation(json &block, _lvn_tb &lvn_tb,
       bool value = lvn_tb[idx_arg1].op1 == "true" ? true : false;
       block[i]["value"] = value;
     } else {
+      // std::cerr<<"constant prop: "<<lvn_tb[idx_arg1].op1<<"\n\n";
       block[i]["value"] = std::stoi(lvn_tb[idx_arg1].op1);
     }
   }
@@ -244,7 +247,7 @@ void do_constant_folding(json &block, _lvn_tb &lvn_tb, _variable_map &variables,
     else if (op == "mul") {
       int prod = val1*val2;
       block[i]["value"] = std::to_string(prod);
-      lvn_tb[i].op1 = prod; 
+      lvn_tb[i].op1 = std::to_string(prod); 
     } else if (op == "and") {
       if(val1 == 0) {
         block[i]["value"] = false;
@@ -414,6 +417,9 @@ void optimize_function(json &f) {
 }
 
 void do_lvn() {
+  // std::ifstream file("clobber.json");
+  // json program = json::parse(file);
+
   json program = json::parse(stdin);
 
   for (auto &f : program["functions"]) {

@@ -193,10 +193,10 @@ void find_reaching_definitions(json &f) {
 
 // Do data flow analysis
 void do_dfa() {
-  // json program = json::parse(stdin);
+  json program = json::parse(stdin);
 
-  std::ifstream file("cond-args.json");
-  json program = json::parse(file);
+  // std::ifstream file("cond-args.json");
+  // json program = json::parse(file);
 
   for (auto &f : program["functions"]) {
     find_reaching_definitions(f);
