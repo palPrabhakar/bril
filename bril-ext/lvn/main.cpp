@@ -6,6 +6,7 @@
 #include <map>
 #include <string>
 #include <unordered_map>
+// #include <algorithm>
 
 // Local Value Numbering Implementation
 // The current implementation has:
@@ -105,6 +106,7 @@ void analyze_block(json &block, _lvn_tb &lvn_tb, _node_map &node_lookup,
     } else if (op2 != "" && node_lookup.find(op2) != node_lookup.end()) {
       if (inst.contains("dest")) {
         lvn_node.var = lvn_tb[node_lookup[op2]].var;
+        std::swap(lvn_node.op1, lvn_node.op2);
         lvn_tb.push_back(lvn_node);
         variables[inst["dest"]] = node_lookup[op2];
       } else {
@@ -417,7 +419,7 @@ void optimize_function(json &f) {
 }
 
 void do_lvn() {
-  // std::ifstream file("clobber.json");
+  // std::ifstream file("commute.json");
   // json program = json::parse(file);
 
   json program = json::parse(stdin);
