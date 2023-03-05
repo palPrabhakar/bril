@@ -50,6 +50,35 @@ void init_doms(dom_map &map, json &blocks) {
   map[blocks[0]["name"]] = {blocks[0]["name"]};
 }
 
+void insert_entry_block_if_required(cfg_map &predm, json &blocks) {
+  bool required = true;
+
+  for(auto [k, v]: predm) {
+    if(v.empty())
+      return;
+  }
+
+  json eblock;
+  eblock["name"] = "entry";
+
+  predm["entry"] = {};
+
+
+  // current entry block
+  auto ceb = blocks[0]["name"];
+  predm[ceb].push_back("entry");
+  
+  // Not best thing to do
+  json::array_t nblocks;
+  nblocks.push_back(eblock);
+    
+  for(auto blk: blocks) {
+    nblocks.push_back(blk);
+  }
+  
+  blocks = nblocks;
+}
+
 // A function to find set of dominators for each block
 // A block b is dominated by block d if block d lies along all the path from
 // entry to block d Note: Under this definition of dominance every node
@@ -66,8 +95,13 @@ void find_dominators(json &f) {
   // print_cfg(cfgm, f["name"]);
 
   auto predm = get_predecessor_map(cfgm);
-  // std::cerr << "predecessor map";
+  // std::cerr << "predecessor map\n";
   // print_cfg(predm, f["name"]);
+  
+  // TODO:
+  // Check the predecessor graph
+  // If none of the blocks have empty predecessor graph then insert a unique entry block
+  insert_entry_block_if_required(predm, blocks);
 
   dom_map doms;
   init_doms(doms, blocks);
@@ -92,7 +126,7 @@ void find_dominators(json &f) {
     }
   }
 
-  std::cerr << "dominator algorithm halted\n\n";
+  // std::cerr << "dominator algorithm halted\n\n";
 
   for (auto block : blocks) {
     std::cerr << block["name"] << ":\n";
@@ -105,10 +139,10 @@ void find_dominators(json &f) {
 
 // Do dominator analysis
 void do_dom_analysis() {
-  // json program = json::parse(stdin);
+  json program = json::parse(stdin);
 
-  std::ifstream file("loopcond.json");
-  json program = json::parse(file);
+  // std::ifstream file("loopcond.json");
+  // json program = json::parse(file);
 
   for (auto &f : program["functions"]) {
     find_dominators(f);

@@ -3,9 +3,8 @@
 # echo Running Dead code elimination 
 
 # FILE=simple.bril
-# FILE=../../examples/test/df/cond-args.bril
-# FILE=../../examples/test/df/cond.bril
-FILE=../../examples/test/dom/loopcond.bril
+# FILE=../../examples/test/dom/loopcond.bril
+FILE=../../examples/test/dom/while.bril
 
 
 if [[ "$#" -eq 1 ]]; then
@@ -13,9 +12,9 @@ if [[ "$#" -eq 1 ]]; then
 fi
 
 
-# bril2json < $FILE | ./dom-bin
+bril2json < $FILE | ./dom-bin
 
-./dom-bin
+# ./dom-bin
 
 # cat $FILE
 # bril2json < $FILE
