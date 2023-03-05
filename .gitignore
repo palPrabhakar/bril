@@ -9,10 +9,11 @@ __pycache__
 .vscode
 a.out
 tdce
-lvn
-df
-cfg
-form-block
+lvn-bin
+df-bin
+cfg-bin
+form-block-bin
+dom-bin
 *.dSYM
 
 

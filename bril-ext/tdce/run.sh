@@ -13,7 +13,7 @@ fi
 
 cat $FILE
 
-bril2json < $FILE | ./tdce | bril2txt
+bril2json < $FILE | ./tdce-bin | bril2txt
 
 # bril2json < $FILE | ./tdce-bin
 

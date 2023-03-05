@@ -1,0 +1,155 @@
+# (a + b) * (a + b)
+@main {
+  a: int = const 4;
+  b: int = const 2;
+  sum1: int = add a b;
+  sum2: int = add a b;
+  prod: int = mul sum1 sum2;
+  print prod;
+}
+@main {
+  a: int = const 4;
+  b: int = const 2;
+  sum1: int = add a b;
+  sum2: int = id sum1;
+  prod: int = mul sum1 sum1;
+  print prod;
+}
+@main {
+  a: int = const 4;
+  b: int = const 2;
+  sum1: int = const 6;
+  sum2: int = const 6;
+  prod: int = const 36;
+  print prod;
+}
+\n------------\n
+@main {
+  a: int = const 100;
+  a: int = const 42;
+  print a;
+}
+@main {
+  lvn.0: int = const 100;
+  a: int = const 42;
+  print a;
+}
+@main {
+  lvn.0: int = const 100;
+  a: int = const 42;
+  print a;
+}
+\n------------\n
+\n------------\n
+# ARGS: -c
+# (a + b) * (b + a)
+@main {
+  a: int = const 4;
+  b: int = const 2;
+  sum1: int = add a b;
+  sum2: int = add b a;
+  prod: int = mul sum1 sum2;
+  print prod;
+}
+@main {
+  a: int = const 4;
+  b: int = const 2;
+  sum1: int = add a b;
+  sum2: int = add b a;
+  prod: int = mul sum1 sum2;
+  print prod;
+}
+@main {
+  a: int = const 4;
+  b: int = const 2;
+  sum1: int = const 6;
+  sum2: int = const 4;
+  prod: int = const 36;
+  print prod;
+}
+# CMD: bril2json < {filename} | python3 ../../lvn.py | python3 ../../tdce.py tdce | bril2txt
+
+@main {
+  a: int = const 4;
+  b: int = const 2;
+  sum1: int = add a b;
+  sum2: int = add a b;
+  prod: int = mul sum1 sum2;
+  print prod;
+}
+@main {
+  a: int = const 4;
+  b: int = const 2;
+  sum1: int = add a b;
+  sum2: int = id sum1;
+  prod: int = mul sum1 sum1;
+  print prod;
+}
+@main {
+  a: int = const 4;
+  b: int = const 2;
+  sum1: int = const 6;
+  sum2: int = const 6;
+  prod: int = const 36;
+  print prod;
+}
+\n------------\n
+# CMD: bril2json < {filename} | python3 ../../lvn.py -f | python3 ../../tdce.py tdce | bril2txt
+@main {
+  v1: int = const 4;
+  v2: int = const 0;
+  mul1: int = mul v1 v2;
+  add1: int = add v1 v2;
+  v2: int = const 3;
+  print mul1;
+  print add1;
+}
+@main {
+  v1: int = const 4;
+  lvn.1: int = const 0;
+  mul1: int = mul v1 lvn.1;
+  add1: int = add v1 lvn.1;
+  v2: int = const 3;
+  print mul1;
+  print add1;
+}
+@main {
+  v1: int = const 4;
+  lvn.0: int = const 0;
+  mul1: int = const 0;
+  add1: int = const 4;
+  v2: int = const 3;
+  print mul1;
+  print add1;
+}
+\n------------\n
+@main {
+  a: int = const 4;
+  b: int = const 2;
+  sum1: int = add a b;
+  sum2: int = add a b;
+  jmp .label;
+.label:
+  prod: int = mul sum1 sum2;
+  print prod;
+}
+@main {
+  a: int = const 4;
+  b: int = const 2;
+  sum1: int = add a b;
+  sum2: int = id sum1;
+  jmp .label;
+.label:
+  prod: int = mul sum1 sum2;
+  print prod;
+}
+@main {
+  a: int = const 4;
+  b: int = const 2;
+  sum1: int = const 6;
+  sum2: int = const 6;
+  jmp .label;
+.label:
+  prod: int = mul sum1 sum2;
+  print prod;
+}

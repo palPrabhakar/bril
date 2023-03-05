@@ -15,7 +15,7 @@ fi
 
 # bril2json < $FILE | ./form-block-bin | bril2txt
 
-bril2json < $FILE | ./cfg
+bril2json < $FILE | ./cfg-bin
 
 bril2json < $FILE | python3 ../../examples/cfg_dot.py
 

@@ -5,7 +5,7 @@
 # FILE=simple.bril
 # FILE=../../examples/test/df/cond-args.bril
 # FILE=../../examples/test/df/cond.bril
-FILE=../../examples/test/df/fact.bril
+FILE=../../examples/test/dom/loopcond.bril
 
 
 if [[ "$#" -eq 1 ]]; then
@@ -13,12 +13,12 @@ if [[ "$#" -eq 1 ]]; then
 fi
 
 
-bril2json < $FILE | ./dfa-bin
+# bril2json < $FILE | ./dom-bin
 
-# ./dfa
+./dom-bin
 
 # cat $FILE
 # bril2json < $FILE
 
-bril2json < $FILE | python3 ../../examples/df.py 'defined'
+bril2json < $FILE | python3 ../../examples/dom.py 
 
