@@ -53,8 +53,8 @@ void init_doms(dom_map &map, json &blocks) {
 void insert_entry_block_if_required(cfg_map &predm, json &blocks) {
   bool required = true;
 
-  for(auto [k, v]: predm) {
-    if(v.empty())
+  for (auto [k, v] : predm) {
+    if (v.empty())
       return;
   }
 
@@ -63,19 +63,18 @@ void insert_entry_block_if_required(cfg_map &predm, json &blocks) {
 
   predm["entry"] = {};
 
-
   // current entry block
   auto ceb = blocks[0]["name"];
   predm[ceb].push_back("entry");
-  
+
   // Not best thing to do
   json::array_t nblocks;
   nblocks.push_back(eblock);
-    
-  for(auto blk: blocks) {
+
+  for (auto blk : blocks) {
     nblocks.push_back(blk);
   }
-  
+
   blocks = nblocks;
 }
 
@@ -84,7 +83,7 @@ void insert_entry_block_if_required(cfg_map &predm, json &blocks) {
 // entry to block d Note: Under this definition of dominance every node
 // dominates itself Input: Procedure f Output: For each block b in f, the set of
 // blocks that dominate b
-void find_dominators(json &f) {
+dom_map find_dominators(json &f) {
   // the list of blocks the algorithm is looking at
   auto blocks = get_named_blocks(f);
   // std::cerr<<blocks.dump(2)<<"\n";
@@ -97,10 +96,10 @@ void find_dominators(json &f) {
   auto predm = get_predecessor_map(cfgm);
   // std::cerr << "predecessor map\n";
   // print_cfg(predm, f["name"]);
-  
-  // TODO:
+
   // Check the predecessor graph
-  // If none of the blocks have empty predecessor graph then insert a unique entry block
+  // If none of the blocks have empty predecessor graph then insert a unique
+  // entry block
   insert_entry_block_if_required(predm, blocks);
 
   dom_map doms;
@@ -116,7 +115,7 @@ void find_dominators(json &f) {
       std::string bname = block["name"];
 
       auto dom = get_incoming_dominators(bname, predm, doms);
-    
+
       dom.insert(bname);
 
       if (dom != doms[bname]) {
@@ -128,12 +127,67 @@ void find_dominators(json &f) {
 
   // std::cerr << "dominator algorithm halted\n\n";
 
-  for (auto block : blocks) {
-    std::cerr << block["name"] << ":\n";
-    for (auto blk : doms[block["name"]]) {
-      std::cerr << "  " << blk << "\n";
+  // for (auto block : blocks) {
+  //   std::cerr << block["name"] << ":\n";
+  //   for (auto blk : doms[block["name"]]) {
+  //     std::cerr << "  " << blk << "\n";
+  //   }
+  //   std::cerr << "\n";
+  // }
+
+  return doms;
+}
+
+std::string get_idom(dom_map dom, std::string bname) {
+  // get blocks dominators
+  std::string idom;
+  auto bdoms = dom[bname];
+  // create a copy of block dominators
+  auto idom_set = bdoms;
+
+  // walk through the dominators of the blocks 
+  // find their dominators and remove them from the idom_set
+  // the last remaining element must be the idom of the block
+  for(auto bd: bdoms) {
+    for(auto d: dom[bd]) {
+      idom_set.erase(d);
     }
-    std::cerr << "\n";
+  }
+
+  
+  if(!idom_set.empty()) {
+    idom = *idom_set.begin();
+  }
+
+  return idom; 
+}
+
+
+// A function to create the dominator tree
+// Dominator tree captures the dominance information in  a tree
+// Every block has a node in the tree and the edges goes from the immediate
+// dominator to the dominee. Node n is the immediate dominator of node m if
+// there is no other node in between m and n.
+// Input: function f
+void create_dominator_tree(json &f) {
+  // the list of blocks the algorithm is looking at
+  auto dom = find_dominators(f);
+
+  // create strict dominator set
+  for(auto &[k, v]: dom) {
+    v.erase(k);
+  }
+
+  std::unordered_map<std::string, std::string> idom;
+
+  for(auto [k, v]: dom) {
+    idom[k] = get_idom(dom, k);
+  }
+    
+  // std::cerr<<"dominator tree algorithm halted\n";
+
+  for(auto [k, v]: idom) {
+    std::cerr<<"block: "<<k<<", idom: "<<v<<"\n";
   }
 }
 
@@ -145,7 +199,8 @@ void do_dom_analysis() {
   // json program = json::parse(file);
 
   for (auto &f : program["functions"]) {
-    find_dominators(f);
+    // auto dom = find_dominators(f);
+    create_dominator_tree(f);
   }
 }
 

@@ -19,5 +19,5 @@ bril2json < $FILE | ./dom-bin
 # cat $FILE
 # bril2json < $FILE
 
-bril2json < $FILE | python3 ../../examples/dom.py 
+# bril2json < $FILE | python3 ../../examples/dom.py 
 

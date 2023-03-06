@@ -5,6 +5,11 @@
 
 cfg_map get_predecessor_map(cfg_map map) {
   cfg_map pred;
+
+  // init the map
+  for(auto [key, value]: map) {
+    pred[key] = std::vector<std::string>();
+  }
   
   for(auto [key, value]: map) {
     for(auto val: value) {
