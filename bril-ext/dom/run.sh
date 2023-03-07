@@ -3,8 +3,8 @@
 # echo Running Dead code elimination 
 
 # FILE=simple.bril
-# FILE=../../examples/test/dom/loopcond.bril
-FILE=../../examples/test/dom/while.bril
+FILE=../../examples/test/dom/loopcond.bril
+# FILE=../../examples/test/dom/while.bril
 
 
 if [[ "$#" -eq 1 ]]; then
@@ -19,5 +19,5 @@ bril2json < $FILE | ./dom-bin
 # cat $FILE
 # bril2json < $FILE
 
-# bril2json < $FILE | python3 ../../examples/dom.py 
+bril2json < $FILE | python3 ../../examples/dom.py 'front'
 

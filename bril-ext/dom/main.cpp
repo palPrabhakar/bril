@@ -145,23 +145,21 @@ std::string get_idom(dom_map dom, std::string bname) {
   // create a copy of block dominators
   auto idom_set = bdoms;
 
-  // walk through the dominators of the blocks 
+  // walk through the dominators of the blocks
   // find their dominators and remove them from the idom_set
   // the last remaining element must be the idom of the block
-  for(auto bd: bdoms) {
-    for(auto d: dom[bd]) {
+  for (auto bd : bdoms) {
+    for (auto d : dom[bd]) {
       idom_set.erase(d);
     }
   }
 
-  
-  if(!idom_set.empty()) {
+  if (!idom_set.empty()) {
     idom = *idom_set.begin();
   }
 
-  return idom; 
+  return idom;
 }
-
 
 // A function to create the dominator tree
 // Dominator tree captures the dominance information in  a tree
@@ -169,26 +167,76 @@ std::string get_idom(dom_map dom, std::string bname) {
 // dominator to the dominee. Node n is the immediate dominator of node m if
 // there is no other node in between m and n.
 // Input: function f
-void create_dominator_tree(json &f) {
+std::unordered_map<std::string, std::string> create_dominator_tree(json &f) {
   // the list of blocks the algorithm is looking at
   auto dom = find_dominators(f);
 
   // create strict dominator set
-  for(auto &[k, v]: dom) {
+  for (auto &[k, v] : dom) {
     v.erase(k);
   }
 
   std::unordered_map<std::string, std::string> idom;
 
-  for(auto [k, v]: dom) {
+  for (auto [k, v] : dom) {
     idom[k] = get_idom(dom, k);
   }
-    
+
   // std::cerr<<"dominator tree algorithm halted\n";
 
-  for(auto [k, v]: idom) {
-    std::cerr<<"block: "<<k<<", idom: "<<v<<"\n";
+  // for (auto [k, v] : idom) {
+  //   std::cerr << "block: " << k << ", idom: " << v << "\n";
+  // }
+
+  return idom;
+}
+
+// Dominance frontier
+// The dominance frontier of a node n is the set of nodes that are just outside
+// the dom_set of that nodes. The set of nodes that lie on a path from the node
+// n to exit but are not in the dom_set of the node (only the first node, not
+// it's successors).
+void find_dominance_frontier(json &f) {
+  auto blocks = get_named_blocks(f);
+  // std::cerr<<blocks.dump(2)<<"\n";
+
+  // control flow graph
+  auto cfgm = create_cfg(blocks);
+  // std::cerr << "control flow graph\n";
+  // print_cfg(cfgm, f["name"]);
+
+  auto predm = get_predecessor_map(cfgm);
+  // std::cerr << "predecessor map\n";
+  // print_cfg(predm, f["name"]);
+
+  insert_entry_block_if_required(predm, blocks);
+  
+  auto idoms = create_dominator_tree(f);
+
+  std::unordered_map<std::string, std::vector<std::string>> df;
+
+  for(auto [k, v]: predm) {
+    if(v.size() > 1) {
+      for(auto pred: v) {
+        auto runner = pred;
+        while(runner != idoms[k]) {
+          df[runner].push_back(k);
+          runner = idoms[runner];
+        }
+      }
+    }
   }
+
+  std::cerr<<"dominance frontier algorithm halted\n";
+
+  for(auto [k, v]: df) {
+    std::cerr<<k<<": \n";
+    for(auto n: v) {
+      std::cerr<<"  "<<n;
+    }
+    std::cerr<<"\n";
+  }
+
 }
 
 // Do dominator analysis
@@ -199,9 +247,11 @@ void do_dom_analysis() {
   // json program = json::parse(file);
 
   for (auto &f : program["functions"]) {
-    // auto dom = find_dominators(f);
-    create_dominator_tree(f);
+    // auto doms = find_dominators(f);
+    // auto idoms = create_dominator_tree(f);
+    find_dominance_frontier(f);
   }
+
 }
 
 int main() {
