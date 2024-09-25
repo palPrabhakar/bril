@@ -7,20 +7,17 @@ json get_named_blocks(json &f) {
   json::array_t blocks =  get_blocks(f);
   json::array_t ret_blocks;
 
-  // std::cerr<<static_cast<json>(blocks).dump(2)<<std::endl;
-
   int bi = 0;
   std::string name = "";
   for(int i = 0; i < blocks.size(); ++i) {
     if(blocks[i].size() == 1 && blocks[i][0].contains("label")) {
       name = blocks[i][0]["label"];
-      // std::cerr<<"block name: "<<name<<"\n";
       json nblock; 
       nblock["name"] = name;
       nblock["insts"] = blocks[++i];
       ret_blocks.push_back(nblock);
     } else {
-      name = "block" + std::to_string(bi++);
+      name = "b" + std::to_string(bi++);
       json nblock; 
       nblock["name"] = name;
       nblock["insts"] = blocks[i];

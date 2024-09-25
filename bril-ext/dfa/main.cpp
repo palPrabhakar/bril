@@ -1,8 +1,6 @@
 #include "../cfg/cfg.h"
 #include "../form-blocks/form-block.h"
 #include "../json.hpp"
-#include <algorithm>
-#include <fstream>
 #include <iostream>
 #include <pthread.h>
 #include <unordered_map>
@@ -87,8 +85,8 @@ string_set do_set_union(string_set s1, string_set s2) {
 }
 
 // Calculates the reaching definitions
-// Reaching defintions: At a program point p, the set of all defintions that are
-// available at that point is the set of reaching defintions at that point.
+// Reaching definitions: At a program point p, the set of all definitions that are
+// available at that point is the set of reaching definitions at that point.
 // Input:
 // json function
 // Output:
@@ -104,7 +102,7 @@ void find_reaching_definitions(json &f) {
   // the set of variables defined at the exit of the block
   // out_set = (in_set - kill_set) Un gen_set
   // gen_set: the set of definitions that are defined the in the block
-  // kill_set: the set of definitions previoulsy defined that got redefined in
+  // kill_set: the set of definitions previously defined that got redefined in
   // the block
   string_map out;
 
@@ -153,7 +151,7 @@ void find_reaching_definitions(json &f) {
     // Iterates over the predecessor vector
     for (auto pred : predm[bname]) {
       // merge
-      // iterate over all the defintions in the out_set of the predecessors
+      // iterate over all the definitions in the out_set of the predecessors
       // and add them to the in_set of the current block;
       for (auto def : out[pred]) {
         in[bname].insert(def);

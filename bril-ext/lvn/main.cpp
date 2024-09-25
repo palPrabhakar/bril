@@ -11,7 +11,7 @@
 // Local Value Numbering Implementation
 // The current implementation has:
 // 1. Trivial common subexpression elimination
-// 2. Trivial copy propogation
+// 2. Trivial copy propagation
 // 3. CSE commutivity
 // 4. Trivial constant folding
 

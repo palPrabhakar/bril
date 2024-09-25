@@ -1,0 +1,58 @@
+[
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-c",
+      "-std=c++20",
+      "-g",
+      "-o",
+      "ssa-bin",
+      "../form-blocks/form-block.cpp"
+    ],
+    "directory": "/home/pal/workspace/bril/bril-ext/ssa",
+    "file": "/home/pal/workspace/bril/bril-ext/form-blocks/form-block.cpp",
+    "output": "/home/pal/workspace/bril/bril-ext/ssa/ssa-bin"
+  },
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-c",
+      "-std=c++20",
+      "-g",
+      "-o",
+      "ssa-bin",
+      "../cfg/cfg.cpp"
+    ],
+    "directory": "/home/pal/workspace/bril/bril-ext/ssa",
+    "file": "/home/pal/workspace/bril/bril-ext/cfg/cfg.cpp",
+    "output": "/home/pal/workspace/bril/bril-ext/ssa/ssa-bin"
+  },
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-c",
+      "-std=c++20",
+      "-g",
+      "-o",
+      "ssa-bin",
+      "../dom/dom.cpp"
+    ],
+    "directory": "/home/pal/workspace/bril/bril-ext/ssa",
+    "file": "/home/pal/workspace/bril/bril-ext/dom/dom.cpp",
+    "output": "/home/pal/workspace/bril/bril-ext/ssa/ssa-bin"
+  },
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-c",
+      "-std=c++20",
+      "-g",
+      "-o",
+      "ssa-bin",
+      "main.cpp"
+    ],
+    "directory": "/home/pal/workspace/bril/bril-ext/ssa",
+    "file": "/home/pal/workspace/bril/bril-ext/ssa/main.cpp",
+    "output": "/home/pal/workspace/bril/bril-ext/ssa/ssa-bin"
+  }
+]
