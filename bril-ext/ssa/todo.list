@@ -1,0 +1,8 @@
+// TODO:
+High Priority:
+        1. Add unique block entry block if not there 
+
+
+others:
+        1. Add block ending jmp statement if not there 
+        2. Add ret statement in function if not there

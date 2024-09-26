@@ -17,15 +17,16 @@ struct var_n {
 };
 
 // rename_map object
-struct rename_obj {
-  size_t i = 0;
-  std::stack<std::string> st;
-};
+// struct rename_obj {
+//   size_t i;
+//   std::stack<std::string> st;
+// };
 
 using json = nlohmann::json;
 using var_def_map = std::unordered_map<std::string, var_n>;
 using name_idx_map = std::unordered_map<std::string, size_t>;
-using rename_map = std::unordered_map<std::string, rename_obj>;
+using rename_stack = std::unordered_map<std::string, std::stack<std::string>>;
+using rename_count = std::unordered_map<std::string, size_t>;
 
 name_idx_map get_block_name_idx_map(json &blocks) {
   name_idx_map ni_map;
@@ -52,7 +53,7 @@ var_def_map get_var_def_map(json &blocks) {
 // block
 // cfg-successors
 // reverse idoms
-void rename(rename_map rmap, std::string bname, json &blocks,
+void rename(rename_stack rmap, std::string bname, json &blocks, rename_count &rcount,
             const cfg_map &cmap, const dom_tree &dtree,
             const name_idx_map &ni_map) {
   // replace each argument with vs[old_name]
@@ -61,9 +62,9 @@ void rename(rename_map rmap, std::string bname, json &blocks,
     if (inst["op"] != "phi" && inst.contains("args")) {
       for (auto &arg : inst["args"]) {
         if (arg.is_object()) {
-          arg["name"] = rmap[arg["name"]].st.top();
+          arg["name"] = rmap[arg["name"]].top();
         } else if (arg.is_string()) {
-          arg = rmap[arg].st.top();
+          arg = rmap[arg].top();
         } else {
           throw std::runtime_error("Invalid Json Object - Rename(...)\n");
         }
@@ -72,8 +73,9 @@ void rename(rename_map rmap, std::string bname, json &blocks,
 
     if (inst.contains("dest")) {
       std::string old_name = inst["dest"];
-      inst["dest"] = old_name + "." + std::to_string(rmap[old_name].i++);
-      rmap[old_name].st.push(inst["dest"]);
+      inst["dest"] = old_name + "." + std::to_string(rcount[old_name]++);
+      rmap[old_name].push(inst["dest"]);
+      // std::cout<<rmap[old_name].top()<<std::endl;
     }
   }
 
@@ -81,10 +83,13 @@ void rename(rename_map rmap, std::string bname, json &blocks,
     auto si = ni_map.at(succ);
     for (auto &inst : blocks[si]["instrs"]) {
       if (inst["op"] == "phi") {
-        if (rmap[inst["dest"]].st.empty()) {
+        // std::cout<<"dest: "<<inst["dest"]<<std::endl;
+        std::string dname = inst["dest"];
+        dname = dname.substr(0, dname.find("."));
+        if (rmap[dname].empty()) {
           inst["args"].push_back("__undefined");
         } else {
-          inst["args"].push_back(rmap[inst["dest"]].st.top());
+          inst["args"].push_back(rmap[dname].top());
         }
         inst["labels"].push_back(bname);
       }
@@ -92,7 +97,7 @@ void rename(rename_map rmap, std::string bname, json &blocks,
   }
 
     for (auto sub : (dtree.contains(bname) ? dtree.at(bname) : std::initializer_list<std::string>() )) {
-      rename(rmap, sub, blocks, cmap, dtree, ni_map);
+      rename(rmap, sub, blocks, rcount, cmap, dtree, ni_map);
     }
 }
 
@@ -129,13 +134,14 @@ void insert_phi_nodes(json &function) {
 
   // rename phi nodes
   // prepare stack --> add fn args on stack
-  rename_map rmap;
+  rename_stack rst;
+  rename_count rcount;
   auto cmap = create_cfg(blocks);
   auto dtree = create_dominator_tree(function);
   for (auto arg : function["args"]) {
-    rmap[arg["name"]].st.push(arg["name"]);
+    rst[arg["name"]].push(arg["name"]);
   }
-  rename(rmap, blocks[0]["name"], blocks, cmap, dtree, ni_map);
+  rename(rst, blocks[0]["name"], blocks, rcount, cmap, dtree, ni_map);
 
   // std::cout<<blocks.dump(2);
 
