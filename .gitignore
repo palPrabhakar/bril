@@ -12,8 +12,10 @@ tdce
 lvn-bin
 df-bin
 cfg-bin
+ssa-bin
 form-block-bin
 dom-bin
+*-bin
 *.dSYM
 
 

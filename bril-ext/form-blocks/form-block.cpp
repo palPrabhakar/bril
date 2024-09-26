@@ -17,7 +17,7 @@ json get_named_blocks(json &f) {
       nblock["insts"] = blocks[++i];
       ret_blocks.push_back(nblock);
     } else {
-      name = "b" + std::to_string(bi++);
+      name = "_block." + std::to_string(bi++);
       json nblock; 
       nblock["name"] = name;
       nblock["insts"] = blocks[i];

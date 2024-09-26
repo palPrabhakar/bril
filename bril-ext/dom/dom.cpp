@@ -162,13 +162,8 @@ std::string get_idom(dom_map dom, std::string bname) {
   return idom;
 }
 
-// A function to create the dominator tree
-// Dominator tree captures the dominance information in  a tree
-// Every block has a node in the tree and the edges goes from the immediate
-// dominator to the dominee. Node n is the immediate dominator of node m if
-// there is no other node in between m and n.
-// Input: function f
-std::unordered_map<std::string, std::string> create_dominator_tree(json &f) {
+
+idom_map get_idom_map(json &f) {
   // the list of blocks the algorithm is looking at
   auto dom = find_dominators(f);
 
@@ -177,19 +172,47 @@ std::unordered_map<std::string, std::string> create_dominator_tree(json &f) {
     v.erase(k);
   }
 
-  std::unordered_map<std::string, std::string> idom;
+  idom_map idom;
 
   for (auto [k, v] : dom) {
     idom[k] = get_idom(dom, k);
   }
 
-  // std::cerr<<"dominator tree algorithm halted\n";
+  // std::cerr<<"idom set\n";
 
   // for (auto [k, v] : idom) {
   //   std::cerr << "block: " << k << ", idom: " << v << "\n";
   // }
 
   return idom;
+}
+
+
+// A function to create the dominator tree
+// Dominator tree captures the dominance information in  a tree
+// Every block has a node in the tree and the edges goes from the immediate
+// dominator to the dominee. Node n is the immediate dominator of node m if
+// there is no other node in between m and n.
+// Input: function f
+dom_tree create_dominator_tree(json &f) {
+  // the list of blocks the algorithm is looking at
+  auto dom = find_dominators(f);
+
+  // create strict dominator set
+  for (auto &[k, v] : dom) {
+    v.erase(k);
+  }
+
+  dom_tree dtree;
+
+  for (auto [k, v] : dom) {
+    auto idom = get_idom(dom, k);
+    dtree[idom].push_back(k);
+  }
+
+  // std::cerr<<"dominator tree algorithm halted\n";
+
+  return dtree;
 }
 
 // Dominance frontier
@@ -212,7 +235,7 @@ df_map find_dominance_frontier(json &f) {
 
   insert_entry_block_if_required(predm, blocks);
   
-  auto idoms = create_dominator_tree(f);
+  auto idoms = get_idom_map(f);
 
   df_map df;
 
