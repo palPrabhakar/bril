@@ -38,9 +38,8 @@ name_idx_map get_block_name_idx_map(json &blocks) {
 var_def_map get_var_def_map(json &blocks) {
   var_def_map vd_map;
   for (auto &block : blocks) {
-    for (auto &inst : block["insts"]) {
+    for (auto &inst : block["instrs"]) {
       if (inst.contains("dest")) {
-        // std::cout<<inst["dest"]<<", "<<block["name"]<<std::endl;
         vd_map[inst["dest"]].defs.push_back(block["name"]);
         vd_map[inst["dest"]].type = inst["type"];
       }
@@ -56,16 +55,14 @@ var_def_map get_var_def_map(json &blocks) {
 void rename(rename_map rmap, std::string bname, json &blocks,
             const cfg_map &cmap, const dom_tree &dtree,
             const name_idx_map &ni_map) {
-  // std::cout << "Calling rename: " << bname << std::endl;
   // replace each argument with vs[old_name]
   auto bi = ni_map.at(bname);
-  for (auto &inst : blocks[bi]["insts"]) {
+  for (auto &inst : blocks[bi]["instrs"]) {
     if (inst["op"] != "phi" && inst.contains("args")) {
       for (auto &arg : inst["args"]) {
         if (arg.is_object()) {
           arg["name"] = rmap[arg["name"]].st.top();
         } else if (arg.is_string()) {
-          // std::cout<<"arg: "<<arg<<std::endl;
           arg = rmap[arg].st.top();
         } else {
           throw std::runtime_error("Invalid Json Object - Rename(...)\n");
@@ -80,19 +77,13 @@ void rename(rename_map rmap, std::string bname, json &blocks,
     }
   }
 
-  // std::cout << "CFG Map" << std::endl;
-
   for (auto succ : cmap.at(bname)) {
-    // std::cout<<"  successor: "<<succ<<std::endl;
     auto si = ni_map.at(succ);
-    for (auto &inst : blocks[si]["insts"]) {
+    for (auto &inst : blocks[si]["instrs"]) {
       if (inst["op"] == "phi") {
-        // std::cout<<"phi operation"<<std::endl;
         if (rmap[inst["dest"]].st.empty()) {
           inst["args"].push_back("__undefined");
         } else {
-          // std::cout<<"dest: "<<inst["dest"]<<std::endl;
-          // std::cout<<"value: "<<rmap[inst["dest"]].st.top()<<std::endl;
           inst["args"].push_back(rmap[inst["dest"]].st.top());
         }
         inst["labels"].push_back(bname);
@@ -105,7 +96,7 @@ void rename(rename_map rmap, std::string bname, json &blocks,
     }
 }
 
-json insert_phi_nodes(json &function) {
+void insert_phi_nodes(json &function) {
   // get dominance frontier
   // { "block_name" : ["block_df1", ..., "block__dfn"]
   auto df = find_dominance_frontier(function);
@@ -129,7 +120,7 @@ json insert_phi_nodes(json &function) {
           obj["type"] = vn.type;
           obj["args"] = json::array();
           obj["labels"] = json::array();
-          block["insts"].insert(block["insts"].begin(), obj);
+          block["instrs"].insert(block["instrs"].begin(), obj);
           vn.defs.emplace_back(df_name);
         }
       }
@@ -148,15 +139,28 @@ json insert_phi_nodes(json &function) {
 
   // std::cout<<blocks.dump(2);
 
-  return blocks;
+  json instrs = json::array();
+  for(auto &block: blocks) {
+    json label;
+    label["label"] = block["name"];
+    instrs.push_back(label);
+    for(auto &&inst: block["instrs"]) {
+      instrs.push_back(inst); 
+    }
+  }
+
+  function["instrs"] = std::move(instrs);
 }
 
 int main() {
   json program = json::parse(stdin);
 
   for (auto &f : program["functions"]) {
-    auto func = insert_phi_nodes(f);
+    insert_phi_nodes(f);
   }
+
+
+  std::cout<<program.dump(2)<<std::endl;
 
   return 0;
 }

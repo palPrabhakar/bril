@@ -33,7 +33,7 @@ cfg_map create_cfg(json &blocks) {
 
   for (auto block : blocks) {
     auto key = block["name"];
-    auto value = block["insts"];
+    auto value = block["instrs"];
 
     map[key] = std::vector<std::string>();
 

@@ -14,13 +14,13 @@ json get_named_blocks(json &f) {
       name = blocks[i][0]["label"];
       json nblock; 
       nblock["name"] = name;
-      nblock["insts"] = blocks[++i];
+      nblock["instrs"] = blocks[++i];
       ret_blocks.push_back(nblock);
     } else {
       name = "_block." + std::to_string(bi++);
       json nblock; 
       nblock["name"] = name;
-      nblock["insts"] = blocks[i];
+      nblock["instrs"] = blocks[i];
       ret_blocks.push_back(nblock);
     }
   }
