@@ -1,5 +1,5 @@
 all:
-	clang++ -std=c++17 -g ../form-blocks/form-block.cpp  ../cfg/cfg.cpp main.cpp -o dom-bin
+	g++ -std=c++17 -g ../form-blocks/form-block.cpp  ../cfg/cfg.cpp dom.cpp main.cpp -o dom-bin
 
 clean:
 	rm dom-bin

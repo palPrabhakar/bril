@@ -52,8 +52,6 @@ void init_doms(dom_map &map, json &blocks) {
 }
 
 void insert_entry_block_if_required(cfg_map &predm, json &blocks) {
-  bool required = true;
-
   for (auto [k, v] : predm) {
     if (v.empty())
       return;
@@ -222,16 +220,11 @@ dom_tree create_dominator_tree(json &f) {
 // it's successors).
 df_map find_dominance_frontier(json &f) {
   auto blocks = get_named_blocks(f);
-  // std::cerr<<blocks.dump(2)<<"\n";
 
   // control flow graph
   auto cfgm = create_cfg(blocks);
-  // std::cerr << "control flow graph\n";
-  // print_cfg(cfgm, f["name"]);
 
   auto predm = get_predecessor_map(cfgm);
-  // std::cerr << "predecessor map\n";
-  // print_cfg(predm, f["name"]);
 
   insert_entry_block_if_required(predm, blocks);
   
